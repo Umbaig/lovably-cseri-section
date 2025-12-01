@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { AlertTriangle, Mail, CheckCircle } from "lucide-react";
+import { AlertTriangle, Mail, CheckCircle, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const questions = [
   { id: 1, text: "Our team usually completes the work we planned.", category: "delivery" },
@@ -73,6 +75,9 @@ const categoryColors: Record<string, string> = {
 const Diagnostics = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const [showPopup, setShowPopup] = useState(false);
 
   const completedCount = Object.keys(answers).length;
@@ -301,14 +306,48 @@ const Diagnostics = () => {
                   <span className="font-medium text-foreground">Full Team Assessment</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Click below to send yourself these results and get a complete team assessment
+                  Enter your email to receive these results and get a complete team assessment
                 </p>
+                
                 <div className="mb-4">
-                  <span className="text-3xl font-bold text-primary">€49</span>
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="text-center"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-primary">€29</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
-                <Button size="lg" className="w-full">
-                  Get Team Assessment
+                <Button 
+                  size="lg" 
+                  className="w-full"
+                  disabled={!email || isSubmitting}
+                  onClick={() => {
+                    setIsSubmitting(true);
+                    // Simulate submission
+                    setTimeout(() => {
+                      toast({
+                        title: "Request received!",
+                        description: "We'll send your results and team assessment details to " + email,
+                      });
+                      setIsSubmitting(false);
+                      setShowPopup(false);
+                    }, 1000);
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Get Team Assessment"
+                  )}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
                   Includes: Team-wide survey • Aggregated analysis • Action recommendations
