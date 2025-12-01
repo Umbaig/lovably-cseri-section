@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const stats = [
   { value: "200+", label: "Teams Assessed" },
@@ -21,14 +22,16 @@ const HeroSection = () => {
           </p>
           
           <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
-            <Button 
-              size="lg" 
-              variant="secondary"
-              className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
-            >
-              Take the Test
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to="/diagnostics">
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
+              >
+                Take the Test
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
 
