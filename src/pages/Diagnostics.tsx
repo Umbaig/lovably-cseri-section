@@ -8,10 +8,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { AlertTriangle, Mail, CheckCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import teamHealthLogo from "@/assets/teamhealth-logo.png";
 
 const questions = [
   { id: 1, text: "Our team usually completes the work we planned.", category: "delivery" },
@@ -121,13 +122,51 @@ const Diagnostics = () => {
     ? Math.round(results.reduce((acc, r) => acc + r.score, 0) / results.length)
     : 0;
 
+  const handleSubmitAssessment = async () => {
+    if (!email) return;
+    
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.functions.invoke("send-assessment-request", {
+        body: { 
+          email, 
+          results: results.map(r => ({
+            category: r.category,
+            name: r.name,
+            score: r.score,
+            average: r.average,
+          })),
+          overallScore 
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Request received!",
+        description: "We'll send your results and team assessment details to " + email,
+      });
+      setShowPopup(false);
+    } catch (error: any) {
+      console.error("Error submitting assessment:", error);
+      toast({
+        title: "Failed to submit",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            AgileConsult
+          <Link to="/" className="flex items-center gap-2">
+            <img src={teamHealthLogo} alt="TeamHealth" className="h-10 w-auto" />
           </Link>
           <Link to="/">
             <Button variant="ghost">Back to Home</Button>
@@ -247,12 +286,18 @@ const Diagnostics = () => {
               ))}
             </div>
 
-            <div className="text-center mt-8">
+            <div className="flex justify-center gap-4 mt-8">
               <Link to="/">
                 <Button variant="outline" size="lg">
                   Back to Home
                 </Button>
               </Link>
+              <Button 
+                size="lg" 
+                onClick={() => setShowPopup(true)}
+              >
+                Request Team Health Check
+              </Button>
             </div>
           </div>
         )}
@@ -327,18 +372,7 @@ const Diagnostics = () => {
                   size="lg" 
                   className="w-full"
                   disabled={!email || isSubmitting}
-                  onClick={() => {
-                    setIsSubmitting(true);
-                    // Simulate submission
-                    setTimeout(() => {
-                      toast({
-                        title: "Request received!",
-                        description: "We'll send your results and team assessment details to " + email,
-                      });
-                      setIsSubmitting(false);
-                      setShowPopup(false);
-                    }, 1000);
-                  }}
+                  onClick={handleSubmitAssessment}
                 >
                   {isSubmitting ? (
                     <>
