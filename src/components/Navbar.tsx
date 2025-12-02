@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import teamHealthLogo from "@/assets/teamhealth-logo.png";
 
 const Navbar = () => {
   return (
@@ -7,7 +6,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <img src={teamHealthLogo} alt="TeamHealth" className="h-10 w-auto" />
+            <span className="text-2xl font-bold text-primary">TeamHealth</span>
           </a>
           
           <div className="hidden md:flex items-center gap-8">
