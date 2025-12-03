@@ -6,13 +6,10 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary">TeamHealth</span>
+            <span className="text-2xl font-bold text-primary">TeamCheck</span>
           </a>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
-              Services
-            </a>
             <a href="#about" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               About
             </a>
@@ -20,10 +17,6 @@ const Navbar = () => {
               Contact
             </a>
           </div>
-
-          <Button variant="default" size="sm">
-            Sign In
-          </Button>
         </div>
       </div>
     </nav>
