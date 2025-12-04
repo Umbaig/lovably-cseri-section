@@ -15,10 +15,10 @@ const HeroSection = () => {
       <div className="container mx-auto px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
-            Know your team maturity level
+            Know your Teams
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            It is eye opening to get an overview of your teams strong and weak sides to take needed actions
+            For new managers and HR: understand how your team really feels in one short check
           </p>
           
           <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
@@ -28,7 +28,7 @@ const HeroSection = () => {
                 variant="secondary"
                 className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
               >
-                Take the Test
+                Run a free team check
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
