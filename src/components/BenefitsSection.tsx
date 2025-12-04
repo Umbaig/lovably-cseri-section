@@ -1,32 +1,39 @@
-import { Users, UserPlus, Rocket, TrendingUp } from "lucide-react";
+import { Users, AlertTriangle, TrendingUp } from "lucide-react";
+import trafficLightImage from "@/assets/traffic-light.png";
 
 const benefits = [
   {
+    icon: AlertTriangle,
+    title: "Spot Issues Early",
+    description: "Identify team problems before they escalate. Get early warnings about morale, collaboration, and engagement.",
+  },
+  {
     icon: Users,
-    title: "Team Restructuring",
-    description: "Evaluate current team dynamics before restructuring to make data-driven decisions about new team compositions.",
-  },
-  {
-    icon: UserPlus,
-    title: "New Team Integration",
-    description: "Help new team members understand existing team culture and identify areas for smooth integration.",
-  },
-  {
-    icon: Rocket,
-    title: "New Project Kickoff",
-    description: "Assess team readiness before starting a new project and address potential collaboration gaps early.",
+    title: "Understand Your Team",
+    description: "See how your team really feels about their work, communication, and environment in minutes.",
   },
   {
     icon: TrendingUp,
-    title: "Continuous Improvement",
-    description: "Run regular health checks to track team progress and celebrate improvements over time.",
+    title: "Take Action",
+    description: "Get clear insights and recommendations to improve team dynamics and performance.",
   },
 ];
 
 const BenefitsSection = () => {
   return (
-    <section id="about" className="py-20 gradient-hero">
-      <div className="container mx-auto px-6">
+    <section id="about" className="py-20 gradient-hero relative overflow-hidden">
+      {/* Traffic Light Background */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+        <div className="w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-white/20">
+          <img 
+            src={trafficLightImage} 
+            alt="Traffic light" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             What can Team Health Check do for your company?
@@ -36,8 +43,7 @@ const BenefitsSection = () => {
           </p>
         </div>
 
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {benefits.map((benefit, index) => (
             <div 
               key={benefit.title}
