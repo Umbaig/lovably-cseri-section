@@ -1,20 +1,20 @@
 const steps = [
   {
     number: 1,
-    title: "Understand Yourself",
-    description: "Start by assessing your own perspective on team dynamics and identify your personal strengths in collaboration.",
+    title: "Invite & Assess",
+    description: "Send quick assessments to your team. Each member answers a short set of questions about how the team works together.",
     badgeClass: "step-badge-1",
   },
   {
     number: 2,
-    title: "Understand Your Team",
-    description: "Get team and personal reports for every assessment, highlighting your team's strengths and weaknesses. Learn why your team operates the way it does.",
+    title: "Get Your Team Report",
+    description: "Receive a clear report showing your team's strengths and areas to improve. Discover who are the Doers, Thinkers, Socializers, and Organizers on your team.",
     badgeClass: "step-badge-2",
   },
   {
     number: 3,
-    title: "Turn Insights into Action",
-    description: "Complete self-directed workshops to reflect on your team's results – turning insights into action and cultivating deeper, more effective working relationships.",
+    title: "Reflect & Improve",
+    description: "Choose a guided workshop to discuss results with your team. Turn insights into real actions that make your team stronger.",
     badgeClass: "step-badge-3",
   },
 ];
@@ -23,6 +23,11 @@ const ProcessSection = () => {
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            How it works in 3 steps
+          </h2>
+        </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {steps.map((step, index) => (
             <div 
