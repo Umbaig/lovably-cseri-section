@@ -15,7 +15,7 @@ const App = () => (
       <Toaster />
       
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/lovably-cseri-section/">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/diagnostics" element={<Diagnostics />} />
