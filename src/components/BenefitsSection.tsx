@@ -1,5 +1,6 @@
 import { Users, AlertTriangle, TrendingUp } from "lucide-react";
 import trafficLightImage from "@/assets/traffic-light.png";
+import emojiChartImage from "@/assets/emoji-chart.png";
 
 const benefits = [
   {
@@ -22,8 +23,8 @@ const benefits = [
 const BenefitsSection = () => {
   return (
     <section id="about" className="py-20 gradient-hero relative overflow-hidden">
-      {/* Traffic Light Background */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+      {/* Traffic Light Background - Right */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
         <div className="w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-white/20">
           <img 
             src={trafficLightImage} 
@@ -31,6 +32,15 @@ const BenefitsSection = () => {
             className="w-full h-full object-cover"
           />
         </div>
+      </div>
+
+      {/* Emoji Chart Background - Left */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
+        <img 
+          src={emojiChartImage} 
+          alt="Emoji to chart transformation" 
+          className="w-64 md:w-96 object-contain"
+        />
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
