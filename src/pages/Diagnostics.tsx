@@ -9,10 +9,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, Mail, CheckCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, Mail, CheckCircle, Loader2, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import teamHealthLogo from "@/assets/teamhealth-logo.png";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+} from "recharts";
 
 const questions = [
   { id: 1, text: "Our team usually completes the work we planned.", category: "delivery" },
@@ -73,9 +81,66 @@ const categoryColors: Record<string, string> = {
   leadership: "bg-gradient-middle",
 };
 
+const actionPointsByCategory: Record<string, Record<number, { level: string; actions: string }>> = {
+  delivery: {
+    1: { level: "Critical", actions: "Stop starting, start finishing; limit WIP; create basic board; daily check‑ins on blocked work." },
+    2: { level: "Weak", actions: "Add simple workflow policies; introduce basic estimation; start weekly planning and review." },
+    3: { level: "Moderate", actions: "Refine backlog; use clear acceptance criteria; track flow metrics (cycle time, throughput)." },
+    4: { level: "Strong", actions: "Optimize handovers; experiment with smaller batch sizes; introduce service‑level expectations." },
+    5: { level: "Excellent", actions: "Protect focus time; use data to forecast; share delivery insights with stakeholders regularly." },
+  },
+  ownership: {
+    1: { level: "Critical", actions: "Clarify who owns what; define roles and responsibilities; set visible team goals." },
+    2: { level: "Weak", actions: "Introduce simple \"DRI\" (directly responsible individual) per work item; agree on basic working agreements." },
+    3: { level: "Moderate", actions: "Regularly review commitments vs. outcomes; add short \"what did we learn?\" reviews." },
+    4: { level: "Strong", actions: "Empower team to self‑assign work; use peer commitments instead of only manager‑driven tasks." },
+    5: { level: "Excellent", actions: "Encourage experimentation with clear owners; celebrate accountability stories publicly." },
+  },
+  communication: {
+    1: { level: "Critical", actions: "Establish minimum communication rhythm (daily/weekly); decide which channels for what." },
+    2: { level: "Weak", actions: "Introduce short check‑ins; document decisions in one shared place; encourage clarification questions." },
+    3: { level: "Moderate", actions: "Run regular retros; pair or mob on complex work; visualise dependencies." },
+    4: { level: "Strong", actions: "Encourage cross‑team syncs; rotate facilitation; practice structured decision techniques." },
+    5: { level: "Excellent", actions: "Share knowledge intentionally (brown‑bags, demos); coach others in feedback and facilitation." },
+  },
+  trust: {
+    1: { level: "Critical", actions: "Address obvious harmful behaviours; set ground rules for respect; offer anonymous input options." },
+    2: { level: "Weak", actions: "Start regular \"temperature checks\"; leaders model vulnerability (admit mistakes, ask for help)." },
+    3: { level: "Moderate", actions: "Introduce feedback norms (\"clear, kind, specific\"); use blameless reviews after issues." },
+    4: { level: "Strong", actions: "Invite dissenting views explicitly; rotate meeting ownership to increase voice diversity." },
+    5: { level: "Excellent", actions: "Run periodic \"team agreements\" refresh; support peer coaching and mentoring." },
+  },
+  value: {
+    1: { level: "Critical", actions: "Clarify basic mission and for whom the team creates value; map current work to that mission." },
+    2: { level: "Weak", actions: "Define 2–3 near‑term outcomes; stop or pause work that clearly does not align." },
+    3: { level: "Moderate", actions: "Use simple OKRs or goals; regularly connect tasks to customer problems." },
+    4: { level: "Strong", actions: "Involve team in prioritisation; review impact metrics, not just output." },
+    5: { level: "Excellent", actions: "Invite customers or stakeholders to demos; co‑create roadmap with evidence from users." },
+  },
+  leadership: {
+    1: { level: "Critical", actions: "Ensure basic structure: regular planning, check‑ins, and reviews; reduce ad‑hoc chaos." },
+    2: { level: "Weak", actions: "Clarify decision rights; leaders communicate priorities and constraints; start documenting process." },
+    3: { level: "Moderate", actions: "Introduce continuous‑improvement loop; review and adjust process each sprint/month." },
+    4: { level: "Strong", actions: "Delegate decisions closer to the work; use data to fine‑tune process (bottlenecks, delays)." },
+    5: { level: "Excellent", actions: "Leaders act as coaches; process is lightweight, regularly pruned, and co‑owned by the team." },
+  },
+};
+
+const getLevelColor = (level: string) => {
+  switch (level) {
+    case "Critical": return "text-red-600 bg-red-50 border-red-200";
+    case "Weak": return "text-orange-600 bg-orange-50 border-orange-200";
+    case "Moderate": return "text-yellow-600 bg-yellow-50 border-yellow-200";
+    case "Strong": return "text-green-600 bg-green-50 border-green-200";
+    case "Excellent": return "text-emerald-600 bg-emerald-50 border-emerald-200";
+    default: return "text-muted-foreground bg-muted border-border";
+  }
+};
+
 const Diagnostics = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -106,6 +171,7 @@ const Diagnostics = () => {
       name: categoryNames[category],
       score: Math.round((total / count) * 20),
       average: (total / count).toFixed(1),
+      averageRaw: total / count,
       color: categoryColors[category],
     }));
   };
@@ -121,6 +187,29 @@ const Diagnostics = () => {
   const overallScore = results.length > 0 
     ? Math.round(results.reduce((acc, r) => acc + r.score, 0) / results.length)
     : 0;
+
+  // Prepare radar chart data
+  const radarData = results.map((r) => ({
+    category: r.name.split(" ")[0],
+    fullName: r.name,
+    value: r.averageRaw,
+    fullMark: 5,
+  }));
+
+  const getActionPoints = () => {
+    return results.map((r) => {
+      const scoreLevel = Math.round(r.averageRaw);
+      const clampedLevel = Math.max(1, Math.min(5, scoreLevel));
+      const actionData = actionPointsByCategory[r.category]?.[clampedLevel];
+      return {
+        category: r.category,
+        name: r.name,
+        score: r.average,
+        level: actionData?.level || "Unknown",
+        actions: actionData?.actions || "No specific actions available.",
+      };
+    });
+  };
 
   const handleSubmitAssessment = async () => {
     if (!email) return;
@@ -159,6 +248,154 @@ const Diagnostics = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (showReport) {
+    const actionPoints = getActionPoints();
+    return (
+      <div className="min-h-screen bg-muted/30">
+        {/* Header */}
+        <header className="bg-background border-b border-border sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={teamHealthLogo} alt="TeamHealth" className="h-10 w-auto" />
+            </Link>
+            <Button variant="ghost" onClick={() => setShowReport(false)}>
+              Back to Results
+            </Button>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="bg-background rounded-xl p-8 shadow-sm mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-8 h-8 text-primary" />
+              <h1 className="text-3xl font-bold text-primary">Suggested Action Points</h1>
+            </div>
+            <p className="text-muted-foreground">
+              Based on your assessment scores, here are personalized recommendations for each category.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {actionPoints.map((item) => (
+              <div key={item.category} className="bg-background rounded-xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-lg text-foreground">{item.name}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">{item.score}/5</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getLevelColor(item.level)}`}>
+                      {item.level}
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-foreground">{item.actions}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-4 mt-8">
+            <Button variant="outline" size="lg" onClick={() => setShowReport(false)}>
+              Back to Results
+            </Button>
+            <Button size="lg" onClick={() => setShowPopup(true)}>
+              Request Full Team Assessment
+            </Button>
+          </div>
+        </main>
+
+        {/* Results Popup - same as before */}
+        <Dialog open={showPopup} onOpenChange={setShowPopup}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <AlertTriangle className="w-6 h-6 text-amber-500" />
+                Important Notice
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-amber-800 font-medium">This data will not be stored</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    Your responses are only visible during this session and will be lost when you leave.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-blue-800 font-medium">This is your perception</p>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Remember, this reflects your individual view of the team. Other team members may have different perspectives.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-4 mt-4">
+                <div className="text-center mb-4">
+                  <h3 className="font-semibold text-lg text-foreground mb-2">
+                    Want the full picture?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Get a comprehensive team assessment with analysis of all team members' answers 
+                    and a detailed summary of changes needed.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-foreground">Full Team Assessment</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Enter your email to receive these results and get a complete team assessment
+                  </p>
+                  
+                  <div className="mb-4">
+                    <Input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="text-center"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold text-primary">€29</span>
+                    <span className="text-muted-foreground ml-2">one-time</span>
+                  </div>
+                  <Button 
+                    size="lg" 
+                    className="w-full"
+                    disabled={!email || isSubmitting}
+                    onClick={handleSubmitAssessment}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Get Team Assessment"
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Includes: Team-wide survey • Aggregated analysis • Action recommendations
+                  </p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -266,6 +503,36 @@ const Diagnostics = () => {
               </p>
             </div>
 
+            {/* Radar Chart */}
+            <div className="bg-background rounded-xl p-8 shadow-sm">
+              <h2 className="text-xl font-semibold text-foreground mb-6 text-center">Team Health Radar</h2>
+              <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                    <PolarGrid stroke="hsl(var(--border))" />
+                    <PolarAngleAxis 
+                      dataKey="category" 
+                      tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+                    />
+                    <PolarRadiusAxis 
+                      angle={30} 
+                      domain={[0, 5]} 
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                    />
+                    <Radar
+                      name="Score"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      fill="hsl(var(--primary))"
+                      fillOpacity={0.4}
+                      strokeWidth={2}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Category Scores */}
             <div className="grid gap-4">
               {results.map((result) => (
                 <div key={result.category} className="bg-background rounded-xl p-6 shadow-sm">
@@ -286,12 +553,21 @@ const Diagnostics = () => {
               ))}
             </div>
 
-            <div className="flex justify-center gap-4 mt-8">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
               <Link to="/">
                 <Button variant="outline" size="lg">
                   Back to Home
                 </Button>
               </Link>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => setShowReport(true)}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Get Action Report
+              </Button>
               <Button 
                 size="lg" 
                 onClick={() => setShowPopup(true)}
