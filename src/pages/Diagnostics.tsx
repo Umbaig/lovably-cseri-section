@@ -81,6 +81,24 @@ const categoryColors: Record<string, string> = {
   leadership: "bg-gradient-middle",
 };
 
+// Maturity levels mapping
+const maturityLevels: Record<number, { name: string; description: string }> = {
+  1: { name: "Ad‑hoc", description: "Work is mostly reactive, roles unclear, success depends on a few individuals." },
+  2: { name: "Emerging", description: "Some routines exist, but they are inconsistent and often bypassed under pressure." },
+  3: { name: "Defined", description: "Ways of working are agreed, most people follow them, issues are discussed openly." },
+  4: { name: "Proactive", description: "Team anticipates problems, uses data and feedback, and improves its own process." },
+  5: { name: "Adaptive", description: "Team continuously experiments, aligns tightly with stakeholders, and improves faster than its environment." },
+};
+
+// Score to maturity level mapping (percentage based)
+const getMaturityLevel = (scorePercent: number): number => {
+  if (scorePercent < 40) return 1;
+  if (scorePercent < 50) return 2;
+  if (scorePercent < 70) return 3;
+  if (scorePercent < 85) return 4;
+  return 5;
+};
+
 const actionPointsByCategory: Record<string, Record<number, { level: string; actions: string }>> = {
   delivery: {
     1: { level: "Critical", actions: "Stop starting, start finishing; limit WIP; create basic board; daily check‑ins on blocked work." },
@@ -126,16 +144,17 @@ const actionPointsByCategory: Record<string, Record<number, { level: string; act
   },
 };
 
-const getLevelColor = (level: string) => {
+const getMaturityLevelColor = (level: number) => {
   switch (level) {
-    case "Critical": return "text-red-600 bg-red-50 border-red-200";
-    case "Weak": return "text-orange-600 bg-orange-50 border-orange-200";
-    case "Moderate": return "text-yellow-600 bg-yellow-50 border-yellow-200";
-    case "Strong": return "text-green-600 bg-green-50 border-green-200";
-    case "Excellent": return "text-emerald-600 bg-emerald-50 border-emerald-200";
+    case 1: return "text-red-600 bg-red-50 border-red-200";
+    case 2: return "text-orange-600 bg-orange-50 border-orange-200";
+    case 3: return "text-yellow-600 bg-yellow-50 border-yellow-200";
+    case 4: return "text-green-600 bg-green-50 border-green-200";
+    case 5: return "text-emerald-600 bg-emerald-50 border-emerald-200";
     default: return "text-muted-foreground bg-muted border-border";
   }
 };
+
 
 const Diagnostics = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -198,18 +217,23 @@ const Diagnostics = () => {
 
   const getActionPoints = () => {
     return results.map((r) => {
-      const scoreLevel = Math.round(r.averageRaw);
-      const clampedLevel = Math.max(1, Math.min(5, scoreLevel));
-      const actionData = actionPointsByCategory[r.category]?.[clampedLevel];
+      const maturityLevel = getMaturityLevel(r.score);
+      const maturityInfo = maturityLevels[maturityLevel];
+      const actionData = actionPointsByCategory[r.category]?.[maturityLevel];
       return {
         category: r.category,
         name: r.name,
-        score: r.average,
-        level: actionData?.level || "Unknown",
+        score: r.score,
+        maturityLevel,
+        maturityName: maturityInfo?.name || "Unknown",
+        maturityDescription: maturityInfo?.description || "",
         actions: actionData?.actions || "No specific actions available.",
       };
     });
   };
+
+  const overallMaturityLevel = getMaturityLevel(overallScore);
+  const overallMaturityInfo = maturityLevels[overallMaturityLevel];
 
   const handleSubmitAssessment = async () => {
     if (!email) return;
@@ -266,10 +290,25 @@ const Diagnostics = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Overall Maturity */}
           <div className="bg-background rounded-xl p-8 shadow-sm mb-6">
             <div className="flex items-center gap-3 mb-4">
               <FileText className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold text-primary">Suggested Action Points</h1>
+              <h1 className="text-3xl font-bold text-primary">Action Report</h1>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Overall Team Maturity</p>
+                <p className="text-2xl font-bold text-foreground">{overallScore}%</p>
+              </div>
+              <div className="text-right">
+                <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold border ${getMaturityLevelColor(overallMaturityLevel)}`}>
+                  Level {overallMaturityLevel} – {overallMaturityInfo?.name}
+                </span>
+                <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                  {overallMaturityInfo?.description}
+                </p>
+              </div>
             </div>
             <p className="text-muted-foreground">
               Based on your assessment scores, here are personalized recommendations for each category.
@@ -279,16 +318,20 @@ const Diagnostics = () => {
           <div className="space-y-4">
             {actionPoints.map((item) => (
               <div key={item.category} className="bg-background rounded-xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-lg text-foreground">{item.name}</h3>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground">{item.score}/5</span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getLevelColor(item.level)}`}>
-                      {item.level}
+                    <span className="text-sm text-muted-foreground">{item.score}%</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getMaturityLevelColor(item.maturityLevel)}`}>
+                      Level {item.maturityLevel} – {item.maturityName}
                     </span>
                   </div>
                 </div>
+                <p className="text-sm text-muted-foreground mb-3 italic">
+                  {item.maturityDescription}
+                </p>
                 <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm font-medium text-foreground mb-1">Suggested Actions:</p>
                   <p className="text-foreground">{item.actions}</p>
                 </div>
               </div>
