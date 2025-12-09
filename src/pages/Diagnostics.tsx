@@ -74,12 +74,21 @@ const categoryNames: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  delivery: "bg-step-1",
-  ownership: "bg-step-2",
-  communication: "bg-step-3",
-  trust: "bg-primary",
-  value: "bg-accent",
-  leadership: "bg-gradient-middle",
+  delivery: "bg-blue-500",
+  ownership: "bg-green-500",
+  communication: "bg-purple-500",
+  trust: "bg-orange-500",
+  value: "bg-pink-500",
+  leadership: "bg-cyan-500",
+};
+
+const categoryHexColors: Record<string, string> = {
+  delivery: "#3b82f6",
+  ownership: "#22c55e",
+  communication: "#a855f7",
+  trust: "#f97316",
+  value: "#ec4899",
+  leadership: "#06b6d4",
 };
 
 // Maturity levels mapping for categories
@@ -723,17 +732,32 @@ const Diagnostics = () => {
             {/* Radar Chart */}
             <div className="bg-background rounded-xl p-8 shadow-sm">
               <h2 className="text-xl font-semibold text-foreground mb-6 text-center">Team Health Radar</h2>
-              <div className="w-full h-80">
+              <div className="w-full h-[500px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
                     <PolarAngleAxis 
                       dataKey="category" 
-                      tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+                      tick={({ x, y, payload, index }) => {
+                        const color = categoryHexColors[results[index]?.category] || "hsl(var(--foreground))";
+                        return (
+                          <text
+                            x={x}
+                            y={y}
+                            textAnchor="middle"
+                            fill={color}
+                            fontSize={13}
+                            fontWeight={600}
+                          >
+                            {payload.value}
+                          </text>
+                        );
+                      }}
                     />
                     <PolarRadiusAxis 
                       angle={30} 
                       domain={[0, 5]} 
+                      tickCount={11}
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                     />
                     <Radar
@@ -741,33 +765,34 @@ const Diagnostics = () => {
                       dataKey="value"
                       stroke="hsl(var(--primary))"
                       fill="hsl(var(--primary))"
-                      fillOpacity={0.4}
-                      strokeWidth={2}
+                      fillOpacity={0.3}
+                      strokeWidth={3}
                     />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Category Scores */}
-            <div className="grid gap-4">
-              {results.map((result) => (
-                <div key={result.category} className="bg-background rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-foreground">{result.name}</h3>
-                    <span className="text-lg font-bold text-primary">{result.score}%</span>
+            {/* Category Scores - Compact Grid */}
+            <div className="bg-background rounded-xl p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Category Scores</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {results.map((result) => (
+                  <div 
+                    key={result.category} 
+                    className="p-3 rounded-lg border border-border"
+                    style={{ borderLeftColor: categoryHexColors[result.category], borderLeftWidth: 4 }}
+                  >
+                    <p className="text-xs text-muted-foreground truncate">{result.name}</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-lg font-bold" style={{ color: categoryHexColors[result.category] }}>
+                        {result.score}%
+                      </span>
+                      <span className="text-xs text-muted-foreground">({result.average}/5)</span>
+                    </div>
                   </div>
-                  <div className="w-full bg-muted rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full ${result.color} transition-all duration-500`}
-                      style={{ width: `${result.score}%` }}
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Average rating: {result.average}/5
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -779,108 +804,87 @@ const Diagnostics = () => {
               </Link>
               <Button 
                 size="lg" 
-                variant="secondary"
-                onClick={() => setShowReport(true)}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Get Action Report
-              </Button>
-              <Button 
-                size="lg" 
                 onClick={() => setShowPopup(true)}
               >
-                Request Team Health Check
+                Next Steps
               </Button>
             </div>
           </div>
         )}
       </main>
 
-      {/* Results Popup */}
+      {/* Results Popup - Simplified with 3 options */}
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <AlertTriangle className="w-6 h-6 text-amber-500" />
-              Important Notice
+            <DialogTitle className="text-xl text-center">
+              What would you like to do?
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm text-amber-800 font-medium">This data will not be stored</p>
-                <p className="text-sm text-amber-700 mt-1">
-                  Your responses are only visible during this session and will be lost when you leave.
-                </p>
-              </div>
+            <div className="mb-4">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="text-center"
+              />
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm text-blue-800 font-medium">This is your perception</p>
-                <p className="text-sm text-blue-700 mt-1">
-                  Remember, this reflects your individual view of the team. Other team members may have different perspectives.
-                </p>
+            {/* Option 1: Get Summary on Email */}
+            <Button 
+              variant="outline"
+              size="lg" 
+              className="w-full justify-start gap-3 h-auto py-4"
+              disabled={!email || isSubmitting}
+              onClick={handleSubmitAssessment}
+            >
+              <Mail className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-medium">Get Summary on Email</p>
+                <p className="text-xs text-muted-foreground font-normal">Free - Receive your results via email</p>
               </div>
-            </div>
+            </Button>
 
-            <div className="border-t border-border pt-4 mt-4">
-              <div className="text-center mb-4">
-                <h3 className="font-semibold text-lg text-foreground mb-2">
-                  Want the full picture?
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Get a comprehensive team assessment with analysis of all team members' answers 
-                  and a detailed summary of changes needed.
-                </p>
+            {/* Option 2: Buy Action Summary €29 */}
+            <Button 
+              size="lg" 
+              className="w-full justify-start gap-3 h-auto py-4"
+              disabled={!email}
+              onClick={() => {
+                setShowPopup(false);
+                setShowReport(true);
+              }}
+            >
+              <FileText className="w-5 h-5 flex-shrink-0" />
+              <div className="text-left flex-1">
+                <p className="font-medium">Get Action Report</p>
+                <p className="text-xs opacity-80 font-normal">Detailed recommendations for each category</p>
               </div>
+              <span className="font-bold">€29</span>
+            </Button>
 
-              <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-6 text-center">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <span className="font-medium text-foreground">Full Team Assessment</span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Enter your email to receive these results and get a complete team assessment
-                </p>
-                
-                <div className="mb-4">
-                  <Input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="text-center"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-primary">€29</span>
-                  <span className="text-muted-foreground ml-2">one-time</span>
-                </div>
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  disabled={!email || isSubmitting}
-                  onClick={handleSubmitAssessment}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Get Team Assessment"
-                  )}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Includes: Team-wide survey • Aggregated analysis • Action recommendations
-                </p>
+            {/* Option 3: Individual Lens Assessment */}
+            <Button 
+              variant="secondary"
+              size="lg" 
+              className="w-full justify-start gap-3 h-auto py-4"
+              disabled={!email}
+              onClick={() => {
+                toast({
+                  title: "Coming Soon",
+                  description: "Individual lens assessment will allow you to compare individual reports with the team report.",
+                });
+              }}
+            >
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-medium">Individual Lens Assessment</p>
+                <p className="text-xs text-muted-foreground font-normal">Compare individual vs team reports</p>
               </div>
-            </div>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
