@@ -9,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, Mail, CheckCircle, Loader2, FileText } from "lucide-react";
+import { AlertTriangle, Mail, CheckCircle, Loader2, FileText, Download } from "lucide-react";
+import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import teamHealthLogo from "@/assets/teamhealth-logo.png";
@@ -81,7 +82,7 @@ const categoryColors: Record<string, string> = {
   leadership: "bg-gradient-middle",
 };
 
-// Maturity levels mapping
+// Maturity levels mapping for categories
 const maturityLevels: Record<number, { name: string; description: string }> = {
   1: { name: "Ad‑hoc", description: "Work is mostly reactive, roles unclear, success depends on a few individuals." },
   2: { name: "Emerging", description: "Some routines exist, but they are inconsistent and often bypassed under pressure." },
@@ -90,7 +91,72 @@ const maturityLevels: Record<number, { name: string; description: string }> = {
   5: { name: "Adaptive", description: "Team continuously experiments, aligns tightly with stakeholders, and improves faster than its environment." },
 };
 
-// Score to maturity level mapping (percentage based)
+// Granular overall maturity descriptions based on average score
+const getOverallMaturityDescription = (scorePercent: number): { level: string; name: string; description: string } => {
+  if (scorePercent < 20) {
+    return {
+      level: "1.0",
+      name: "Very low maturity",
+      description: "The team is at a very early stage of maturity. Work is mostly reactive, priorities change frequently, and results depend heavily on a few individuals rather than a stable way of working. There is little shared clarity on goals, roles, or expectations, which makes problems repeat instead of being systematically addressed."
+    };
+  }
+  if (scorePercent < 30) {
+    return {
+      level: "1.5",
+      name: "Low maturity",
+      description: "The team shows early signs of structure, but most of the time operates in \"firefighting mode\". Some people try to create order, yet agreements are fragile and often ignored under pressure. Misunderstandings, rework, and frustration are common, and the team has limited confidence in its ability to deliver reliably."
+    };
+  }
+  if (scorePercent < 40) {
+    return {
+      level: "2.0",
+      name: "Emerging maturity",
+      description: "The team has started to put basic routines and agreements in place. Planning, communication, and roles are somewhat clearer, but still inconsistent and dependent on who is present. Issues are noticed, yet they are more often worked around than solved, and the team is only beginning to think about long‑term improvement."
+    };
+  }
+  if (scorePercent < 50) {
+    return {
+      level: "2.5",
+      name: "Early developing",
+      description: "The foundation for a more stable way of working is visible. The team follows some shared practices, and there is a growing willingness to talk about what is not working. However, discipline fluctuates, ownership is uneven across people, and the team still struggles to maintain predictability when priorities or workload shift."
+    };
+  }
+  if (scorePercent < 60) {
+    return {
+      level: "3.0",
+      name: "Defined maturity",
+      description: "The team has a defined way of working that most people understand and follow. Goals, responsibilities, and basic processes are clear enough for the team to deliver reliably in normal conditions. At the same time, gaps in ownership, communication, or trust still create friction, and improvement tends to be reactive rather than planned."
+    };
+  }
+  if (scorePercent < 70) {
+    return {
+      level: "3.5",
+      name: "Solid but uneven",
+      description: "The team operates on a generally solid foundation and can handle typical challenges with reasonable confidence. Collaboration, leadership, and process are often strong, but one or two areas still lag behind and limit overall performance. The team is aware of issues and talks about improvement, yet it has not fully turned that intent into consistent habits."
+    };
+  }
+  if (scorePercent < 80) {
+    return {
+      level: "4.0",
+      name: "Proactive maturity",
+      description: "The team is proactive in how it works and improves. It uses data, feedback, and reflection to spot problems early and address them before they grow. Ownership is broadly shared, communication is transparent, and experiments to improve ways of working are becoming part of the team's normal behaviour."
+    };
+  }
+  if (scorePercent < 90) {
+    return {
+      level: "4.5",
+      name: "High, sustainable performance",
+      description: "The team demonstrates high maturity across most dimensions and performs strongly even under pressure. It continually refines how it delivers value, adapts quickly to change, and learns from both success and failure. Remaining gaps are usually specific and known, and the team is already taking targeted steps to close them."
+    };
+  }
+  return {
+    level: "5.0",
+    name: "Exceptional, adaptive maturity",
+    description: "The team operates at an exceptional level of maturity. It combines clarity, trust, and discipline with a strong appetite for learning and innovation. Ways of working are co‑owned and regularly improved, the team and stakeholders are tightly aligned on outcomes, and the team reliably turns change and feedback into better results over time."
+  };
+};
+
+// Score to maturity level mapping (percentage based) for categories
 const getMaturityLevel = (scorePercent: number): number => {
   if (scorePercent < 40) return 1;
   if (scorePercent < 50) return 2;
@@ -234,6 +300,96 @@ const Diagnostics = () => {
 
   const overallMaturityLevel = getMaturityLevel(overallScore);
   const overallMaturityInfo = maturityLevels[overallMaturityLevel];
+  const granularMaturity = getOverallMaturityDescription(overallScore);
+
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+      let yPos = 20;
+
+      // Title
+      pdf.setFontSize(24);
+      pdf.setTextColor(33, 33, 33);
+      pdf.text("Team Health Action Report", margin, yPos);
+      yPos += 15;
+
+      // Overall Score
+      pdf.setFontSize(14);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`Overall Score: ${overallScore}%`, margin, yPos);
+      yPos += 8;
+
+      pdf.setFontSize(16);
+      pdf.setTextColor(33, 33, 33);
+      pdf.text(`Level ${granularMaturity.level} - ${granularMaturity.name}`, margin, yPos);
+      yPos += 10;
+
+      // Overall description
+      pdf.setFontSize(10);
+      pdf.setTextColor(80, 80, 80);
+      const descLines = pdf.splitTextToSize(granularMaturity.description, pageWidth - 2 * margin);
+      pdf.text(descLines, margin, yPos);
+      yPos += descLines.length * 5 + 10;
+
+      // Category sections
+      const actionPoints = getActionPoints();
+      actionPoints.forEach((item) => {
+        // Check if we need a new page
+        if (yPos > 250) {
+          pdf.addPage();
+          yPos = 20;
+        }
+
+        // Category header
+        pdf.setFontSize(12);
+        pdf.setTextColor(33, 33, 33);
+        pdf.text(`${item.name} - ${item.score}%`, margin, yPos);
+        yPos += 6;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`Level ${item.maturityLevel} - ${item.maturityName}`, margin, yPos);
+        yPos += 6;
+
+        // Description
+        pdf.setFontSize(9);
+        pdf.setTextColor(120, 120, 120);
+        const itemDescLines = pdf.splitTextToSize(item.maturityDescription, pageWidth - 2 * margin);
+        pdf.text(itemDescLines, margin, yPos);
+        yPos += itemDescLines.length * 4 + 4;
+
+        // Actions
+        pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+        pdf.text("Suggested Actions:", margin, yPos);
+        yPos += 5;
+        pdf.setFontSize(9);
+        const actionLines = pdf.splitTextToSize(item.actions, pageWidth - 2 * margin);
+        pdf.text(actionLines, margin, yPos);
+        yPos += actionLines.length * 4 + 10;
+      });
+
+      pdf.save("team-health-report.pdf");
+      toast({
+        title: "PDF exported!",
+        description: "Your action report has been downloaded.",
+      });
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      toast({
+        title: "Export failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const handleSubmitAssessment = async () => {
     if (!email) return;
@@ -296,21 +452,21 @@ const Diagnostics = () => {
               <FileText className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-bold text-primary">Action Report</h1>
             </div>
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-muted/50 rounded-lg mb-4">
               <div>
                 <p className="text-sm text-muted-foreground">Overall Team Maturity</p>
                 <p className="text-2xl font-bold text-foreground">{overallScore}%</p>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold border ${getMaturityLevelColor(overallMaturityLevel)}`}>
-                  Level {overallMaturityLevel} – {overallMaturityInfo?.name}
+                  Level {granularMaturity.level} – {granularMaturity.name}
                 </span>
-                <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                  {overallMaturityInfo?.description}
-                </p>
               </div>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {granularMaturity.description}
+            </p>
+            <p className="text-muted-foreground mt-4">
               Based on your assessment scores, here are personalized recommendations for each category.
             </p>
           </div>
@@ -338,9 +494,27 @@ const Diagnostics = () => {
             ))}
           </div>
 
-          <div className="flex justify-center gap-4 mt-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
             <Button variant="outline" size="lg" onClick={() => setShowReport(false)}>
               Back to Results
+            </Button>
+            <Button 
+              size="lg" 
+              variant="secondary"
+              onClick={handleExportPdf}
+              disabled={isExportingPdf}
+            >
+              {isExportingPdf ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export PDF
+                </>
+              )}
             </Button>
             <Button size="lg" onClick={() => setShowPopup(true)}>
               Request Full Team Assessment
