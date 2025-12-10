@@ -871,12 +871,9 @@ const Diagnostics = () => {
               variant="secondary"
               size="lg" 
               className="w-full justify-start gap-3 h-auto py-4"
-              disabled={!email}
               onClick={() => {
-                toast({
-                  title: "Coming Soon",
-                  description: "Individual lens assessment will allow you to compare individual reports with the team report.",
-                });
+                setShowPopup(false);
+                window.location.href = "/individual-assessment";
               }}
             >
               <CheckCircle className="w-5 h-5 flex-shrink-0" />
