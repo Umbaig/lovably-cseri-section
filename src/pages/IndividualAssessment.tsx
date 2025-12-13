@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail, Loader2, FileText, Download, Users } from "lucide-react";
+import { Mail, Loader2, FileText, Download, Users, GitMerge } from "lucide-react";
 import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,14 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
+
+interface TeamResult {
+  category: string;
+  name: string;
+  score: number;
+  average: string;
+  averageRaw: number;
+}
 
 // Individual assessment questions - 12 questions (2 per category)
 const individualQuestions = [
@@ -407,11 +415,24 @@ const IndividualAssessment = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showMergedReport, setShowMergedReport] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get team results from navigation state if available
+  const [teamResults, setTeamResults] = useState<TeamResult[] | null>(null);
+  const [teamOverallScore, setTeamOverallScore] = useState<number | null>(null);
+  
+  useEffect(() => {
+    if (location.state?.teamResults) {
+      setTeamResults(location.state.teamResults);
+      setTeamOverallScore(location.state.teamOverallScore);
+    }
+  }, [location.state]);
 
   const completedCount = Object.keys(answers).length;
   const progress = (completedCount / individualQuestions.length) * 100;
@@ -611,6 +632,150 @@ const IndividualAssessment = () => {
     }
   };
 
+  // Merged Report View - Side by side comparison
+  if (showMergedReport && teamResults) {
+    const mergedData = results.map((r) => {
+      const teamResult = teamResults.find(t => t.category === r.category);
+      return {
+        category: r.name.split(" ")[0],
+        fullName: r.name,
+        individual: r.averageRaw,
+        team: teamResult?.averageRaw || 0,
+        individualScore: r.score,
+        teamScore: teamResult?.score || 0,
+      };
+    });
+
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <header className="bg-background border-b border-border sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={teamHealthLogo} alt="TeamHealth" className="h-10 w-auto" />
+            </Link>
+            <Button variant="ghost" onClick={() => setShowMergedReport(false)}>
+              Back to Results
+            </Button>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8 max-w-5xl">
+          <div className="bg-background rounded-xl p-8 shadow-sm mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <GitMerge className="w-8 h-8 text-primary" />
+              <h1 className="text-3xl font-bold text-primary">Merged Report</h1>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Compare your individual assessment with the team assessment to identify perception gaps and alignment areas.
+            </p>
+            
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-600 dark:text-blue-400">Team Score</p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{teamOverallScore}%</p>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                <p className="text-sm text-purple-600 dark:text-purple-400">Your Score</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{overallScore}%</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-background rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-xl font-semibold text-foreground mb-6 text-center">Comparison Radar</h2>
+            <div className="w-full h-[500px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={mergedData}>
+                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarAngleAxis 
+                    dataKey="category" 
+                    tick={{ fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600 }}
+                  />
+                  <PolarRadiusAxis 
+                    angle={30} 
+                    domain={[0, 5]} 
+                    tickCount={11}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  />
+                  <Radar
+                    name="Team"
+                    dataKey="team"
+                    stroke="#3b82f6"
+                    fill="#3b82f6"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                  <Radar
+                    name="Individual"
+                    dataKey="individual"
+                    stroke="#a855f7"
+                    fill="#a855f7"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-blue-500"></div>
+                <span className="text-sm text-muted-foreground">Team</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-purple-500"></div>
+                <span className="text-sm text-muted-foreground">Individual</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-background rounded-xl p-6 shadow-sm mb-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Score Comparison by Category</h2>
+            <div className="space-y-4">
+              {mergedData.map((item) => {
+                const diff = item.individualScore - item.teamScore;
+                const diffLabel = diff > 0 ? `+${diff}%` : `${diff}%`;
+                const diffColor = diff > 5 ? "text-green-600" : diff < -5 ? "text-red-600" : "text-muted-foreground";
+                return (
+                  <div key={item.fullName} className="p-4 border border-border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium text-foreground">{item.fullName}</h3>
+                      <span className={`text-sm font-semibold ${diffColor}`}>
+                        {diff !== 0 && diffLabel}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded bg-blue-500"></div>
+                        <span className="text-sm text-muted-foreground">Team:</span>
+                        <span className="text-sm font-semibold">{item.teamScore}%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded bg-purple-500"></div>
+                        <span className="text-sm text-muted-foreground">You:</span>
+                        <span className="text-sm font-semibold">{item.individualScore}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+            <Button variant="outline" size="lg" onClick={() => setShowMergedReport(false)}>
+              Back to Results
+            </Button>
+            <Link to="/">
+              <Button size="lg">
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (showReport) {
     const actionPoints = getActionPoints();
     return (
@@ -752,9 +917,6 @@ const IndividualAssessment = () => {
                     </span>
                     <div>
                       <p className="text-foreground font-medium">{question.text}</p>
-                      <p className="text-xs text-muted-foreground mt-1" style={{ borderLeftColor: categoryHexColors[question.category], borderLeftWidth: 3, paddingLeft: 8 }}>
-                        {categoryNames[question.category]}
-                      </p>
                     </div>
                   </div>
                   <div className="space-y-2 ml-12">
@@ -944,21 +1106,40 @@ const IndividualAssessment = () => {
               <span className="font-bold">€29</span>
             </Button>
 
-            <Button 
-              variant="secondary"
-              size="lg" 
-              className="w-full justify-start gap-3 h-auto py-4"
-              onClick={() => {
-                setShowPopup(false);
-                navigate("/diagnostics");
-              }}
-            >
-              <Users className="w-5 h-5 flex-shrink-0" />
-              <div className="text-left">
-                <p className="font-medium">Take Team Assessment</p>
-                <p className="text-xs text-muted-foreground font-normal">Compare your view with the team</p>
-              </div>
-            </Button>
+            {teamResults ? (
+              <Button 
+                variant="secondary"
+                size="lg" 
+                className="w-full justify-start gap-3 h-auto py-4"
+                onClick={() => {
+                  setShowPopup(false);
+                  setShowMergedReport(true);
+                }}
+              >
+                <GitMerge className="w-5 h-5 flex-shrink-0" />
+                <div className="text-left flex-1">
+                  <p className="font-medium">Get Merged Report</p>
+                  <p className="text-xs text-muted-foreground font-normal">Team vs Individual comparison</p>
+                </div>
+                <span className="font-bold">€29</span>
+              </Button>
+            ) : (
+              <Button 
+                variant="secondary"
+                size="lg" 
+                className="w-full justify-start gap-3 h-auto py-4"
+                onClick={() => {
+                  setShowPopup(false);
+                  navigate("/diagnostics");
+                }}
+              >
+                <Users className="w-5 h-5 flex-shrink-0" />
+                <div className="text-left">
+                  <p className="font-medium">Take Team Assessment First</p>
+                  <p className="text-xs text-muted-foreground font-normal">Then compare with your individual results</p>
+                </div>
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
