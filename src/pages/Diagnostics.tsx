@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -239,6 +239,7 @@ const Diagnostics = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate();
 
   const completedCount = Object.keys(answers).length;
   const progress = (completedCount / questions.length) * 100;
@@ -873,7 +874,18 @@ const Diagnostics = () => {
               className="w-full justify-start gap-3 h-auto py-4"
               onClick={() => {
                 setShowPopup(false);
-                window.location.href = "/individual-assessment";
+                navigate("/individual-assessment", {
+                  state: {
+                    teamResults: results.map(r => ({
+                      category: r.category,
+                      name: r.name,
+                      score: r.score,
+                      average: r.average,
+                      averageRaw: r.averageRaw,
+                    })),
+                    teamOverallScore: overallScore
+                  }
+                });
               }}
             >
               <CheckCircle className="w-5 h-5 flex-shrink-0" />
