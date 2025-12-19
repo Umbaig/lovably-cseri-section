@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -17,25 +17,39 @@ const HeroSection = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
             Know your Teams
           </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <p className="text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
             A quick team health check for managers who want to spot problems early, without long surveys.
           </p>
           
-          <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
-            <Link to="/diagnostics">
+          {/* Two Path Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <Link to="/managers">
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
+                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto"
               >
-                Run a free team check
+                <Users className="mr-2 h-5 w-5" />
+                For Managers & Team Leads
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <p className="text-sm text-primary-foreground/60 mt-4">
-              Ideal for small tech and project teams of 5–20 people
-            </p>
+            <Link to="/scrum-masters">
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto"
+              >
+                <Zap className="mr-2 h-5 w-5" />
+                For Scrum Masters & Teams
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
+          
+          <p className="text-sm text-primary-foreground/60 mt-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+            Ideal for small tech and project teams of 5–20 people
+          </p>
         </div>
 
         {/* Stats Cards */}
