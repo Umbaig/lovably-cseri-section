@@ -37,8 +37,8 @@ const HeroSection = () => {
             <Link to="/scrum-masters">
               <Button 
                 size="lg" 
-                variant="outline"
-                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto"
+                variant="secondary"
+                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto"
               >
                 <Zap className="mr-2 h-5 w-5" />
                 For Scrum Masters & Teams
