@@ -21,72 +21,50 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
+// New 12 questions: 6 categories × 2 types (personal and team)
 const questions = [
-  { id: 1, text: "Our team usually completes the work we planned.", category: "delivery" },
-  { id: 2, text: "Unplanned tasks do not significantly disrupt our sprint or iteration.", category: "delivery" },
-  { id: 3, text: "We have clear priorities and stick to them.", category: "delivery" },
-  { id: 4, text: "Dependencies are managed effectively and rarely block progress.", category: "delivery" },
-  { id: 5, text: "We limit our work in progress and avoid spreading ourselves thin.", category: "delivery" },
-  { id: 6, text: "We regularly deliver meaningful, visible progress.", category: "delivery" },
-  { id: 7, text: "Team members proactively help each other when needed.", category: "ownership" },
-  { id: 8, text: "Work ownership is clear, and individuals follow through.", category: "ownership" },
-  { id: 9, text: "The team holds itself accountable for results, not just individuals.", category: "ownership" },
-  { id: 10, text: "Workload is shared fairly across the team.", category: "ownership" },
-  { id: 11, text: "Issues or blockers are raised quickly and openly.", category: "ownership" },
-  { id: 12, text: "The team solves problems together instead of assigning blame.", category: "ownership" },
-  { id: 13, text: "Our meetings are productive and have high engagement.", category: "communication" },
-  { id: 14, text: "Important decisions are shared clearly with the team.", category: "communication" },
-  { id: 15, text: "We discuss and align on expectations before starting work.", category: "communication" },
-  { id: 16, text: "Hand-offs between roles (Dev, QA, PO, etc.) are smooth.", category: "communication" },
-  { id: 17, text: "Team members feel comfortable asking clarifying questions.", category: "communication" },
-  { id: 18, text: "We communicate early when something is unclear or risky.", category: "communication" },
-  { id: 19, text: "Team members speak up openly, even about difficult topics.", category: "trust" },
-  { id: 20, text: "Conflicts are addressed constructively, not avoided.", category: "trust" },
-  { id: 21, text: "Team members trust each other to deliver quality work.", category: "trust" },
-  { id: 22, text: "People admit mistakes without fear of punishment.", category: "trust" },
-  { id: 23, text: "Feedback is shared regularly and respectfully.", category: "trust" },
-  { id: 24, text: "Everyone feels included and valued during discussions.", category: "trust" },
-  { id: 25, text: "The team understands why we build what we build.", category: "value" },
-  { id: 26, text: "The product owner (or equivalent) provides clear direction.", category: "value" },
-  { id: 27, text: "We validate whether the features we deliver create value.", category: "value" },
-  { id: 28, text: "The Definition of Done is clear and consistently followed.", category: "value" },
-  { id: 29, text: "We focus on solving real customer or business problems.", category: "value" },
-  { id: 30, text: "The team understands success metrics for our product/work.", category: "value" },
-  { id: 31, text: "Leaders empower the team rather than micromanage.", category: "leadership" },
-  { id: 32, text: "Decisions are made quickly and clearly.", category: "leadership" },
-  { id: 33, text: "The team regularly reflects and improves its process.", category: "leadership" },
-  { id: 34, text: "Agile/Scrum ceremonies have purpose and value.", category: "leadership" },
-  { id: 35, text: "The team has autonomy to choose how to work.", category: "leadership" },
-  { id: 36, text: "Roles and responsibilities are clear.", category: "leadership" },
+  { id: 1, text: "I feel safe to speak up, ask questions, and admit mistakes in this team.", category: "trust", type: "personal" },
+  { id: 2, text: "Our team members are honest with each other and follow through on what they promise.", category: "trust", type: "team" },
+  { id: 3, text: "I can easily get help from others when I am stuck or overloaded.", category: "collaboration", type: "personal" },
+  { id: 4, text: "Our team works together on goals instead of everyone optimizing only their own tasks.", category: "collaboration", type: "team" },
+  { id: 5, text: "I take responsibility for my work and its impact on the team's results.", category: "ownership", type: "personal" },
+  { id: 6, text: "Our team takes ownership of problems and works to solve them instead of passing them on.", category: "ownership", type: "team" },
+  { id: 7, text: "I regularly complete work items as expected and on time.", category: "delivery", type: "personal" },
+  { id: 8, text: "Our team reliably delivers what we commit to, or renegotiates early when we cannot.", category: "delivery", type: "team" },
+  { id: 9, text: "I understand how my work contributes to outcomes that matter for customers or the business.", category: "value", type: "personal" },
+  { id: 10, text: "Our team focuses on the most important work and avoids low‑value activities.", category: "value", type: "team" },
+  { id: 11, text: "I feel supported by leaders or senior people when the team faces obstacles.", category: "leadership", type: "personal" },
+  { id: 12, text: "Our leaders create clarity, remove blockers, and model the behavior they expect from the team.", category: "leadership", type: "team" },
 ];
 
-const ratingLabels = ["Never", "Rarely", "Sometimes", "Often", "Always"];
+const ratingLabels = ["Not at all true", "Slightly true", "Mostly true", "Completely true"];
 
 const categoryNames: Record<string, string> = {
-  delivery: "Delivery & Predictability",
-  ownership: "Ownership & Accountability",
-  communication: "Communication & Collaboration",
-  trust: "Trust & Psychological Safety",
-  value: "Value & Purpose",
-  leadership: "Leadership & Process",
+  trust: "Trust",
+  collaboration: "Collaboration",
+  ownership: "Ownership",
+  delivery: "Delivery",
+  value: "Value",
+  leadership: "Leadership",
 };
 
 const categoryColors: Record<string, string> = {
-  delivery: "bg-blue-500",
-  ownership: "bg-green-500",
-  communication: "bg-purple-500",
   trust: "bg-orange-500",
+  collaboration: "bg-purple-500",
+  ownership: "bg-green-500",
+  delivery: "bg-blue-500",
   value: "bg-pink-500",
   leadership: "bg-cyan-500",
 };
 
 const categoryHexColors: Record<string, string> = {
-  delivery: "#3b82f6",
-  ownership: "#22c55e",
-  communication: "#a855f7",
   trust: "#f97316",
+  collaboration: "#a855f7",
+  ownership: "#22c55e",
+  delivery: "#3b82f6",
   value: "#ec4899",
   leadership: "#06b6d4",
 };
@@ -249,26 +227,47 @@ const Diagnostics = () => {
   };
 
   const calculateResults = () => {
-    const categoryScores: Record<string, { total: number; count: number }> = {};
+    const personalScores: Record<string, { total: number; count: number }> = {};
+    const teamScores: Record<string, { total: number; count: number }> = {};
 
     questions.forEach((q) => {
       if (answers[q.id]) {
-        if (!categoryScores[q.category]) {
-          categoryScores[q.category] = { total: 0, count: 0 };
+        if (q.type === "personal") {
+          if (!personalScores[q.category]) {
+            personalScores[q.category] = { total: 0, count: 0 };
+          }
+          personalScores[q.category].total += answers[q.id];
+          personalScores[q.category].count += 1;
+        } else {
+          if (!teamScores[q.category]) {
+            teamScores[q.category] = { total: 0, count: 0 };
+          }
+          teamScores[q.category].total += answers[q.id];
+          teamScores[q.category].count += 1;
         }
-        categoryScores[q.category].total += answers[q.id];
-        categoryScores[q.category].count += 1;
       }
     });
 
-    return Object.entries(categoryScores).map(([category, { total, count }]) => ({
-      category,
-      name: categoryNames[category],
-      score: Math.round((total / count) * 20),
-      average: (total / count).toFixed(1),
-      averageRaw: total / count,
-      color: categoryColors[category],
-    }));
+    const categories = Object.keys(categoryNames);
+    
+    return categories.map((category) => {
+      const personal = personalScores[category] || { total: 0, count: 1 };
+      const team = teamScores[category] || { total: 0, count: 1 };
+      const personalAvg = personal.count > 0 ? personal.total / personal.count : 0;
+      const teamAvg = team.count > 0 ? team.total / team.count : 0;
+      const combinedScore = Math.round(((personalAvg + teamAvg) / 2 / 4) * 100);
+      
+      return {
+        category,
+        name: categoryNames[category],
+        score: combinedScore,
+        personalScore: personalAvg,
+        teamScore: teamAvg,
+        average: ((personalAvg + teamAvg) / 2).toFixed(1),
+        averageRaw: (personalAvg + teamAvg) / 2,
+        color: categoryColors[category],
+      };
+    });
   };
 
   const handleShowResults = () => {
@@ -283,12 +282,13 @@ const Diagnostics = () => {
     ? Math.round(results.reduce((acc, r) => acc + r.score, 0) / results.length)
     : 0;
 
-  // Prepare radar chart data
+  // Prepare radar chart data with both personal and team scores
   const radarData = results.map((r) => ({
-    category: r.name.split(" ")[0],
+    category: r.name,
     fullName: r.name,
-    value: r.averageRaw,
-    fullMark: 5,
+    personal: r.personalScore,
+    team: r.teamScore,
+    fullMark: 4,
   }));
 
   const getActionPoints = () => {
@@ -648,14 +648,13 @@ const Diagnostics = () => {
               </h1>
               <p className="text-muted-foreground mb-6">
                 This assessment helps identify your team's strengths and areas for improvement 
-                across six key dimensions. Rate each statement on a scale of 1-5 based on how 
-                often it applies to your team.
+                across six key dimensions. Rate each statement based on how true it is for you and your team.
               </p>
               
               {/* Rating Legend */}
               <div className="flex justify-between gap-2 mb-6">
                 {ratingLabels.map((label, index) => (
-                  <div key={label} className="text-center">
+                  <div key={label} className="text-center flex-1">
                     <div className="text-primary font-semibold">{index + 1}</div>
                     <div className="text-xs text-muted-foreground">{label}</div>
                   </div>
@@ -683,7 +682,7 @@ const Diagnostics = () => {
                     <p className="text-foreground font-medium pt-1">{question.text}</p>
                   </div>
                   <div className="flex gap-2 ml-12">
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                    {[1, 2, 3, 4].map((rating) => (
                       <button
                         key={rating}
                         onClick={() => handleAnswer(question.id, rating)}
@@ -730,7 +729,7 @@ const Diagnostics = () => {
               </p>
             </div>
 
-            {/* Radar Chart */}
+            {/* Radar Chart with two lines */}
             <div className="bg-background rounded-xl p-8 shadow-sm">
               <h2 className="text-xl font-semibold text-foreground mb-6 text-center">Team Health Radar</h2>
               <div className="w-full h-[500px]">
@@ -757,24 +756,33 @@ const Diagnostics = () => {
                     />
                     <PolarRadiusAxis 
                       angle={30} 
-                      domain={[0, 5]} 
-                      tickCount={11}
+                      domain={[0, 4]} 
+                      tickCount={5}
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                     />
                     <Radar
-                      name="Score"
-                      dataKey="value"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary))"
-                      fillOpacity={0.3}
-                      strokeWidth={3}
+                      name="Personal"
+                      dataKey="personal"
+                      stroke="#3b82f6"
+                      fill="#3b82f6"
+                      fillOpacity={0.2}
+                      strokeWidth={2}
                     />
+                    <Radar
+                      name="Team"
+                      dataKey="team"
+                      stroke="#22c55e"
+                      fill="#22c55e"
+                      fillOpacity={0.2}
+                      strokeWidth={2}
+                    />
+                    <Legend />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Category Scores - Compact Grid */}
+            {/* Category Scores - Compact Grid with Personal & Team */}
             <div className="bg-background rounded-xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-foreground mb-4">Category Scores</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -785,11 +793,12 @@ const Diagnostics = () => {
                     style={{ borderLeftColor: categoryHexColors[result.category], borderLeftWidth: 4 }}
                   >
                     <p className="text-xs text-muted-foreground truncate">{result.name}</p>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-lg font-bold" style={{ color: categoryHexColors[result.category] }}>
-                        {result.score}%
-                      </span>
-                      <span className="text-xs text-muted-foreground">({result.average}/5)</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-sm font-medium text-blue-500">P: {result.personalScore.toFixed(1)}</span>
+                      <span className="text-sm font-medium text-green-500">T: {result.teamScore.toFixed(1)}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Combined: {result.score}%
                     </div>
                   </div>
                 ))}
