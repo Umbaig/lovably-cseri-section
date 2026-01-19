@@ -255,8 +255,8 @@ const Managers = () => {
             <Link to="/#contact">
               <Button 
                 size="lg" 
-                variant="outlinePrimary"
-                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
+                variant="outline"
+                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
               >
                 Talk to Us
                 <Users className="ml-2 h-5 w-5" />

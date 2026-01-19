@@ -48,15 +48,6 @@ const HeroSection = () => {
                   See a Sample Report
                 </Button>
               </Link>
-              <Link to="/quick-test">
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Try Quick Test
-                </Button>
-              </Link>
             </div>
           </div>
         </div>

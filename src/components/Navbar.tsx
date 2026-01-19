@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   return (
@@ -13,9 +13,6 @@ const Navbar = () => {
             <a href="#about" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               About
             </a>
-            <Link to="/quick-test" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
-              Quick Test
-            </Link>
             <a href="#contact" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               Contact
             </a>

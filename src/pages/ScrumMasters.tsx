@@ -349,8 +349,8 @@ const ScrumMasters = () => {
             <Link to="/managers">
               <Button 
                 size="lg" 
-                variant="outlinePrimary"
-                className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
+                variant="outline"
+                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <UserPlus className="mr-2 h-5 w-5" />
                 Invite Your Manager
