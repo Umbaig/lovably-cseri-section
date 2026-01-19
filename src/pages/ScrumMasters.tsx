@@ -57,7 +57,7 @@ const ScrumMasters = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto"
+                  className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto"
                 >
                   How It Works
                 </Button>
@@ -350,7 +350,7 @@ const ScrumMasters = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+                className="px-8 py-6 text-lg font-semibold rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <UserPlus className="mr-2 h-5 w-5" />
                 Invite Your Manager

@@ -39,24 +39,13 @@ const HeroSection = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/quick-test">
+              <Link to="/managers#preview">
                 <Button 
                   size="lg" 
                   variant="outline"
                   className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
-                  Try Quick Test
-                  <Zap className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/managers#preview">
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-                >
                   See a Sample Report
-                  <Eye className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
