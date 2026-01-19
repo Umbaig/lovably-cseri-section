@@ -39,6 +39,15 @@ const HeroSection = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+              <Link to="/quick-test">
+                <Button 
+                  size="lg" 
+                  variant="ghost"
+                  className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto border border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10"
+                >
+                  Try Quick Test
+                </Button>
+              </Link>
               <Link to="/managers#preview">
                 <Button 
                   size="lg" 
