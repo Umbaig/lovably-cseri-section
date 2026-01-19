@@ -33,7 +33,7 @@ const HeroSection = () => {
                 <Button 
                   size="lg" 
                   variant="secondary"
-                  className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto"
+                  className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform w-full sm:w-auto text-primary"
                 >
                   Start a Team Check
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -155,7 +155,7 @@ const HeroSection = () => {
             <Button 
               size="lg" 
               variant="secondary"
-              className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform"
+              className="px-8 py-6 text-lg font-semibold rounded-full hover:scale-105 transition-transform text-primary"
             >
               Start a Team Check
               <ArrowRight className="ml-2 h-5 w-5" />
