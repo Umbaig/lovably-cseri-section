@@ -14,34 +14,40 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Quick test questions - 6 questions (1 per category)
+// Quick test questions - 12 questions (2 per category)
 const quickQuestions = [
-  { id: 1, text: "Our team usually completes the work we planned.", category: "delivery" },
-  { id: 2, text: "Team members proactively help each other when needed.", category: "ownership" },
-  { id: 3, text: "Our meetings are productive and have high engagement.", category: "communication" },
-  { id: 4, text: "Team members speak up openly, even about difficult topics.", category: "trust" },
-  { id: 5, text: "The team understands why we build what we build.", category: "value" },
-  { id: 6, text: "Leaders empower the team rather than micromanage.", category: "leadership" },
+  { id: 1, text: "We focus on fixing problems together instead of blaming individuals when things go wrong.", category: "trust" },
+  { id: 2, text: "I feel safe sharing my honest opinion or admitting a mistake without being judged.", category: "trust" },
+  { id: 3, text: "We \"swarm\" to help each other finish work rather than only focusing on our own tasks.", category: "collaboration" },
+  { id: 4, text: "Information and skills are shared openly so that no single person is a bottleneck.", category: "collaboration" },
+  { id: 5, text: "The team—not a manager—is responsible for ensuring our work is high quality and completely finished.", category: "ownership" },
+  { id: 6, text: "We have the authority to change our own processes or tools if we think they aren't working.", category: "ownership" },
+  { id: 7, text: "We deliver a working, finished piece of value every cycle without needing a last-minute rush to finish.", category: "delivery" },
+  { id: 8, text: "We keep things simple and stop doing work that doesn't add real value to the product.", category: "delivery" },
+  { id: 9, text: "We hold each other accountable for following our team's values and Agile principles.", category: "leadership" },
+  { id: 10, text: "We actively coach and teach one another rather than waiting for someone to give us answers.", category: "leadership" },
+  { id: 11, text: "We are comfortable saying \"no\" to unimportant tasks to stay focused on what matters most.", category: "value" },
+  { id: 12, text: "We use real feedback from users to decide what we should build (or stop building) next.", category: "value" },
 ];
 
 const ratingLabels = ["Never", "Rarely", "Sometimes", "Often", "Always"];
 
 const categoryNames: Record<string, string> = {
-  delivery: "Delivery",
-  ownership: "Ownership",
-  communication: "Communication",
   trust: "Trust",
-  value: "Value",
+  collaboration: "Collaboration",
+  ownership: "Ownership",
+  delivery: "Delivery",
   leadership: "Leadership",
+  value: "Value",
 };
 
 const categoryHexColors: Record<string, string> = {
-  delivery: "#3b82f6",
-  ownership: "#22c55e",
-  communication: "#a855f7",
   trust: "#f97316",
-  value: "#ec4899",
+  collaboration: "#a855f7",
+  ownership: "#22c55e",
+  delivery: "#3b82f6",
   leadership: "#06b6d4",
+  value: "#ec4899",
 };
 
 const QuickTest = () => {
@@ -73,10 +79,23 @@ const QuickTest = () => {
   };
 
   const calculateResults = () => {
-    return quickQuestions.map((q) => ({
-      category: q.category,
-      name: categoryNames[q.category],
-      score: answers[q.id] || 0,
+    // Group questions by category and average the scores
+    const categoryScores: Record<string, number[]> = {};
+    quickQuestions.forEach((q) => {
+      if (!categoryScores[q.category]) {
+        categoryScores[q.category] = [];
+      }
+      if (answers[q.id]) {
+        categoryScores[q.category].push(answers[q.id]);
+      }
+    });
+
+    return Object.keys(categoryNames).map((category) => ({
+      category,
+      name: categoryNames[category],
+      score: categoryScores[category]?.length 
+        ? categoryScores[category].reduce((a, b) => a + b, 0) / categoryScores[category].length 
+        : 0,
       fullMark: 5,
     }));
   };
@@ -263,7 +282,7 @@ const QuickTest = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-foreground mb-3">Quick Team Health Check</h1>
           <p className="text-muted-foreground">
-            Answer 6 quick questions to get a snapshot of your team's health
+            Answer 12 quick questions to get a snapshot of your team's health
           </p>
         </div>
 
