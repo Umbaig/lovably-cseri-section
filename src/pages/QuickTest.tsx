@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, ArrowRight, ExternalLink, Users } from "lucide-react";
+import { CheckCircle, ArrowRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import teamHealthLogo from "@/assets/teamhealth-logo.png";
 import {
@@ -18,9 +18,9 @@ import {
 const quickQuestions = [
   { id: 1, text: "We focus on fixing problems together instead of blaming individuals when things go wrong.", category: "trust" },
   { id: 2, text: "I feel safe sharing my honest opinion or admitting a mistake without being judged.", category: "trust" },
-  { id: 3, text: "We \"swarm\" to help each other finish work rather than only focusing on our own tasks.", category: "collaboration" },
+  { id: 3, text: "We jump to help each other finish work rather than only focusing on our own tasks.", category: "collaboration" },
   { id: 4, text: "Information and skills are shared openly so that no single person is a bottleneck.", category: "collaboration" },
-  { id: 5, text: "The team—not a manager—is responsible for ensuring our work is high quality and completely finished.", category: "ownership" },
+  { id: 5, text: "The team is responsible for ensuring our work is high quality and completely finished.", category: "ownership" },
   { id: 6, text: "We have the authority to change our own processes or tools if we think they aren't working.", category: "ownership" },
   { id: 7, text: "We deliver a working, finished piece of value every cycle without needing a last-minute rush to finish.", category: "delivery" },
   { id: 8, text: "We keep things simple and stop doing work that doesn't add real value to the product.", category: "delivery" },
@@ -241,22 +241,11 @@ const QuickTest = () => {
             <p className="text-muted-foreground mb-6">
               Take the full team diagnostic to get detailed insights and actionable recommendations.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/diagnostics">
-                <Button size="lg" className="gap-2">
-                  Take Full Diagnostic <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <a
-                href="https://lovable.dev/projects/4fe70535-df71-4a4b-b4bb-186623334cff"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="lg" className="gap-2">
-                  View Project <ExternalLink className="h-4 w-4" />
-                </Button>
-              </a>
-            </div>
+            <Link to="/diagnostics">
+              <Button size="lg" className="gap-2">
+                Take Full Diagnostic <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </main>
       </div>
@@ -350,18 +339,6 @@ const QuickTest = () => {
           )}
         </div>
 
-        {/* Link to full project */}
-        <div className="mt-12 text-center">
-          <a
-            href="https://lovable.dev/projects/4fe70535-df71-4a4b-b4bb-186623334cff"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            View this project on Lovable
-          </a>
-        </div>
       </main>
     </div>
   );
