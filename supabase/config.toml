@@ -22,3 +22,6 @@ verify_jwt = false
 
 [functions.send-contact-email]
 verify_jwt = false
+
+[functions.analyze-meeting]
+verify_jwt = false

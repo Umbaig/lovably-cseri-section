@@ -37,6 +37,13 @@ const Navbar = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel>AI Seamless Team Assessment</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/meeting-vibe-check" className="cursor-pointer">
+                    Meeting Vibe Check
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Team Knowledge Check Tests</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/scrum-roles-quiz" className="cursor-pointer">

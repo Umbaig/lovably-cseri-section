@@ -10,6 +10,7 @@ import Managers from "./pages/Managers";
 import ScrumMasters from "./pages/ScrumMasters";
 import QuickTest from "./pages/QuickTest";
 import ScrumRolesQuiz from "./pages/ScrumRolesQuiz";
+import MeetingVibeCheck from "./pages/MeetingVibeCheck";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/scrum-masters" element={<ScrumMasters />} />
           <Route path="/quick-test" element={<QuickTest />} />
           <Route path="/scrum-roles-quiz" element={<ScrumRolesQuiz />} />
+          <Route path="/meeting-vibe-check" element={<MeetingVibeCheck />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
