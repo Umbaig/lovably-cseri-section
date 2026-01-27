@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy } from "lucide-react";
 import teamHealthLogo from "@/assets/teamhealth-logo.png";
+import scrumRolesBg from "@/assets/scrum-roles-bg.png";
 
 type Role = "Product Owner" | "Scrum Master" | "The Team";
 
@@ -143,7 +144,12 @@ const ScrumRolesQuiz = () => {
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="min-h-screen relative">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+          style={{ backgroundImage: `url(${scrumRolesBg})` }}
+        />
+        <div className="relative z-10 min-h-screen bg-gradient-to-br from-slate-50/80 to-blue-50/80">
         <header className="bg-white border-b border-border">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
@@ -215,12 +221,18 @@ const ScrumRolesQuiz = () => {
             </div>
           </div>
         </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+        style={{ backgroundImage: `url(${scrumRolesBg})` }}
+      />
+      <div className="relative z-10 min-h-screen bg-gradient-to-br from-slate-50/80 to-blue-50/80">
       <header className="bg-white border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -316,6 +328,7 @@ const ScrumRolesQuiz = () => {
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 };
